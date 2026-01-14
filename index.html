@@ -14,49 +14,190 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f5f5f5;
-            padding: 20px;
+            padding: 40px 20px;
             min-height: 100vh;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+        .timers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            padding: 20px 0;
         }
 
-        .header h1 {
-            color: #4a5f4f;
-            font-size: 2rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .header p {
-            color: #6b7f6f;
-            font-size: 0.9rem;
-        }
-
-        .add-class-section {
+        .timer-card {
             background: white;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
+            border-radius: 20px;
+            padding: 32px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
         }
 
-        .add-class-section h2 {
+        .timer-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #ef5350;
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .timer-card:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background: #e53935;
+            transform: scale(1.1);
+        }
+
+        .circular-timer {
+            position: relative;
+            width: 180px;
+            height: 180px;
+        }
+
+        .circular-timer svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .circular-timer-bg {
+            fill: none;
+            stroke: #e8ede9;
+            stroke-width: 8;
+        }
+
+        .circular-timer-progress {
+            fill: none;
+            stroke: #7ea87e;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .timer-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .timer-time {
+            font-size: 2.2rem;
+            font-weight: 700;
             color: #4a5f4f;
-            font-size: 1.2rem;
-            margin-bottom: 16px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .course-title {
+            font-size: 1.1rem;
             font-weight: 600;
+            color: #4a5f4f;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .goal-text {
+            font-size: 0.85rem;
+            color: #8ba888;
+            text-align: center;
+        }
+
+        .add-timer-btn {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7ea87e 0%, #6b8f6b 100%);
+            color: white;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .add-timer-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .add-timer-btn:active {
+            transform: scale(1.05);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #4a5f4f;
+            margin-bottom: 24px;
+            text-align: center;
         }
 
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .form-group label {
@@ -64,14 +205,14 @@
             color: #6b7f6f;
             font-size: 0.9rem;
             font-weight: 500;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .form-group input {
             width: 100%;
             padding: 12px 16px;
             border: 2px solid #d9e5db;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 1rem;
             transition: all 0.3s;
         }
@@ -84,14 +225,21 @@
 
         .time-inputs {
             display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        .modal-buttons {
+            display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
+            margin-top: 24px;
         }
 
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -101,243 +249,136 @@
         .btn-primary {
             background: linear-gradient(135deg, #7ea87e 0%, #6b8f6b 100%);
             color: white;
-            width: 100%;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            background: linear-gradient(135deg, #6b8f6b 0%, #5a7d5a 100%);
         }
 
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        .classes-list {
-            display: grid;
-            gap: 16px;
-        }
-
-        .class-card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-        }
-
-        .class-card:hover {
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-            transform: translateY(-2px);
-        }
-
-        .class-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .class-name {
-            color: #4a5f4f;
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-
-        .delete-btn {
-            background: #ef5350;
-            color: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-
-        .delete-btn:hover {
-            background: #e53935;
-            transform: scale(1.1);
-        }
-
-        .timer-display {
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        .time {
-            font-size: 3rem;
-            font-weight: 700;
-            color: #4a5f4f;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .goal {
-            color: #8ba888;
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e8ede9;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #7ea87e 0%, #6b8f6b 100%);
-            transition: width 0.3s;
-            border-radius: 4px;
-        }
-
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-        }
-
-        .btn-control {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-start {
-            background: #7ea87e;
-            color: white;
-        }
-
-        .btn-start:hover {
-            background: #6b8f6b;
-        }
-
-        .btn-pause {
-            background: #ffa726;
-            color: white;
-        }
-
-        .btn-pause:hover {
-            background: #fb8c00;
-        }
-
-        .btn-reset {
+        .btn-secondary {
             background: #e0e0e0;
             color: #616161;
         }
 
-        .btn-reset:hover {
+        .btn-secondary:hover {
             background: #bdbdbd;
-        }
-
-        .status {
-            text-align: center;
-            margin-top: 12px;
-            font-size: 0.85rem;
-            color: #7ea87e;
-            font-weight: 500;
-        }
-
-        .status.completed {
-            color: #6b8f6b;
-            font-weight: 600;
         }
 
         .empty-state {
             text-align: center;
-            padding: 48px 24px;
+            padding: 80px 24px;
             color: #8ba888;
         }
 
         .empty-state-icon {
-            font-size: 4rem;
-            margin-bottom: 16px;
+            font-size: 5rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
         }
 
         .empty-state-text {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-hint {
+            font-size: 0.9rem;
+            opacity: 0.7;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>📚 Class Timer</h1>
-            <p>Track your study goals and manage your time effectively</p>
-        </div>
+        <div id="timersGrid" class="timers-grid"></div>
+    </div>
 
-        <div class="add-class-section">
-            <h2>➕ Add New Class</h2>
-            <form id="addClassForm">
+    <button class="add-timer-btn" onclick="timer.openModal()">+</button>
+
+    <!-- Add Timer Modal -->
+    <div id="addTimerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">New Timer</div>
+            <form id="addTimerForm">
                 <div class="form-group">
-                    <label for="className">Class Name</label>
-                    <input type="text" id="className" placeholder="e.g., Mathematics" required>
+                    <label for="courseName">Course Title</label>
+                    <input type="text" id="courseName" placeholder="e.g., Mathematics" required>
                 </div>
                 <div class="form-group">
                     <label>Goal Duration</label>
                     <div class="time-inputs">
-                        <input type="number" id="goalHours" placeholder="Hours" min="0" max="23" value="1" required>
-                        <input type="number" id="goalMinutes" placeholder="Minutes" min="0" max="59" value="0" required>
+                        <input type="number" id="goalHours" placeholder="Hours" min="0" max="23" value="0" required>
+                        <input type="number" id="goalMinutes" placeholder="Minutes" min="0" max="59" value="25" required>
+                        <input type="number" id="goalSeconds" placeholder="Seconds" min="0" max="59" value="0" required>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Add Class</button>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="timer.closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
             </form>
         </div>
-
-        <div id="classesList" class="classes-list"></div>
     </div>
 
     <script>
         class ClassTimer {
             constructor() {
-                this.classes = this.loadClasses();
+                this.timers = this.loadTimers();
                 this.intervals = {};
                 this.init();
             }
 
             init() {
-                this.renderClasses();
-                document.getElementById('addClassForm').addEventListener('submit', (e) => {
+                this.renderTimers();
+                document.getElementById('addTimerForm').addEventListener('submit', (e) => {
                     e.preventDefault();
-                    this.addClass();
+                    this.addTimer();
+                });
+
+                // Close modal on background click
+                document.getElementById('addTimerModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'addTimerModal') {
+                        this.closeModal();
+                    }
                 });
             }
 
-            loadClasses() {
+            loadTimers() {
                 const saved = localStorage.getItem('classTimers');
                 return saved ? JSON.parse(saved) : [];
             }
 
-            saveClasses() {
-                localStorage.setItem('classTimers', JSON.stringify(this.classes));
+            saveTimers() {
+                localStorage.setItem('classTimers', JSON.stringify(this.timers));
             }
 
-            addClass() {
-                const name = document.getElementById('className').value;
+            openModal() {
+                document.getElementById('addTimerModal').classList.add('active');
+                document.getElementById('courseName').focus();
+            }
+
+            closeModal() {
+                document.getElementById('addTimerModal').classList.remove('active');
+                document.getElementById('addTimerForm').reset();
+                document.getElementById('goalHours').value = '0';
+                document.getElementById('goalMinutes').value = '25';
+                document.getElementById('goalSeconds').value = '0';
+            }
+
+            addTimer() {
+                const name = document.getElementById('courseName').value;
                 const hours = parseInt(document.getElementById('goalHours').value) || 0;
                 const minutes = parseInt(document.getElementById('goalMinutes').value) || 0;
+                const seconds = parseInt(document.getElementById('goalSeconds').value) || 0;
 
-                const goalSeconds = hours * 3600 + minutes * 60;
+                const goalSeconds = hours * 3600 + minutes * 60 + seconds;
 
                 if (goalSeconds <= 0) {
                     alert('Please set a goal duration greater than 0');
                     return;
                 }
 
-                const newClass = {
+                const newTimer = {
                     id: Date.now(),
                     name: name,
                     goalSeconds: goalSeconds,
@@ -345,169 +386,145 @@
                     isRunning: false
                 };
 
-                this.classes.push(newClass);
-                this.saveClasses();
-                this.renderClasses();
-
-                document.getElementById('addClassForm').reset();
-                document.getElementById('goalHours').value = '1';
-                document.getElementById('goalMinutes').value = '0';
+                this.timers.push(newTimer);
+                this.saveTimers();
+                this.renderTimers();
+                this.closeModal();
             }
 
-            deleteClass(id) {
+            deleteTimer(id) {
                 if (this.intervals[id]) {
                     clearInterval(this.intervals[id]);
                     delete this.intervals[id];
                 }
-                this.classes = this.classes.filter(c => c.id !== id);
-                this.saveClasses();
-                this.renderClasses();
+                this.timers = this.timers.filter(t => t.id !== id);
+                this.saveTimers();
+                this.renderTimers();
             }
 
-            startTimer(id) {
-                const classItem = this.classes.find(c => c.id === id);
-                if (!classItem || classItem.remainingSeconds <= 0) return;
+            toggleTimer(id) {
+                const timerItem = this.timers.find(t => t.id === id);
+                if (!timerItem || timerItem.remainingSeconds <= 0) return;
 
-                classItem.isRunning = true;
-                this.saveClasses();
-
-                if (this.intervals[id]) {
-                    clearInterval(this.intervals[id]);
-                }
-
-                this.intervals[id] = setInterval(() => {
-                    classItem.remainingSeconds--;
-
-                    if (classItem.remainingSeconds <= 0) {
-                        classItem.remainingSeconds = 0;
-                        classItem.isRunning = false;
+                if (timerItem.isRunning) {
+                    // Pause
+                    timerItem.isRunning = false;
+                    if (this.intervals[id]) {
                         clearInterval(this.intervals[id]);
                         delete this.intervals[id];
                     }
+                } else {
+                    // Start
+                    timerItem.isRunning = true;
+                    this.intervals[id] = setInterval(() => {
+                        timerItem.remainingSeconds--;
 
-                    this.saveClasses();
-                    this.updateClassDisplay(id);
-                }, 1000);
+                        if (timerItem.remainingSeconds <= 0) {
+                            timerItem.remainingSeconds = 0;
+                            timerItem.isRunning = false;
+                            clearInterval(this.intervals[id]);
+                            delete this.intervals[id];
+                        }
 
-                this.renderClasses();
-            }
-
-            pauseTimer(id) {
-                const classItem = this.classes.find(c => c.id === id);
-                if (!classItem) return;
-
-                classItem.isRunning = false;
-                if (this.intervals[id]) {
-                    clearInterval(this.intervals[id]);
-                    delete this.intervals[id];
-                }
-                this.saveClasses();
-                this.renderClasses();
-            }
-
-            resetTimer(id) {
-                const classItem = this.classes.find(c => c.id === id);
-                if (!classItem) return;
-
-                classItem.isRunning = false;
-                classItem.remainingSeconds = classItem.goalSeconds;
-
-                if (this.intervals[id]) {
-                    clearInterval(this.intervals[id]);
-                    delete this.intervals[id];
+                        this.saveTimers();
+                        this.updateTimerDisplay(id);
+                    }, 1000);
                 }
 
-                this.saveClasses();
-                this.renderClasses();
+                this.saveTimers();
+                this.renderTimers();
             }
 
             formatTime(seconds) {
                 const hours = Math.floor(seconds / 3600);
                 const minutes = Math.floor((seconds % 3600) / 60);
                 const secs = seconds % 60;
-                return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+                if (hours > 0) {
+                    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                }
+                return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
             }
 
-            updateClassDisplay(id) {
-                const classItem = this.classes.find(c => c.id === id);
-                if (!classItem) return;
+            formatGoal(seconds) {
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
 
-                const card = document.querySelector(`[data-class-id="${id}"]`);
+                const parts = [];
+                if (hours > 0) parts.push(`${hours}h`);
+                if (minutes > 0) parts.push(`${minutes}m`);
+                if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+
+                return parts.join(' ') + ' Goal';
+            }
+
+            updateTimerDisplay(id) {
+                const timerItem = this.timers.find(t => t.id === id);
+                if (!timerItem) return;
+
+                const card = document.querySelector(`[data-timer-id="${id}"]`);
                 if (!card) return;
 
-                const timeDisplay = card.querySelector('.time');
-                const progressFill = card.querySelector('.progress-fill');
-                const status = card.querySelector('.status');
+                const timeDisplay = card.querySelector('.timer-time');
+                const progressCircle = card.querySelector('.circular-timer-progress');
 
-                timeDisplay.textContent = this.formatTime(classItem.remainingSeconds);
+                timeDisplay.textContent = this.formatTime(timerItem.remainingSeconds);
 
-                const progress = ((classItem.goalSeconds - classItem.remainingSeconds) / classItem.goalSeconds) * 100;
-                progressFill.style.width = `${progress}%`;
-
-                if (classItem.remainingSeconds === 0) {
-                    status.textContent = '✅ Goal Completed!';
-                    status.className = 'status completed';
-                } else if (classItem.isRunning) {
-                    status.textContent = '⏱️ Timer Running';
-                    status.className = 'status';
-                } else {
-                    status.textContent = 'Ready to start';
-                    status.className = 'status';
-                }
+                // Update circular progress
+                const circumference = 2 * Math.PI * 86; // radius is 86
+                const progress = timerItem.remainingSeconds / timerItem.goalSeconds;
+                const offset = circumference * (1 - progress);
+                progressCircle.style.strokeDashoffset = offset;
             }
 
-            renderClasses() {
-                const container = document.getElementById('classesList');
+            renderTimers() {
+                const container = document.getElementById('timersGrid');
 
-                if (this.classes.length === 0) {
+                if (this.timers.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon">🎯</div>
-                            <div class="empty-state-text">No classes yet. Add your first class above!</div>
+                            <div class="empty-state-icon">⏱️</div>
+                            <div class="empty-state-text">No timers yet</div>
+                            <div class="empty-state-hint">Click the + button to add your first timer</div>
                         </div>
                     `;
                     return;
                 }
 
-                container.innerHTML = this.classes.map(classItem => {
-                    const progress = ((classItem.goalSeconds - classItem.remainingSeconds) / classItem.goalSeconds) * 100;
-                    let statusText = 'Ready to start';
-                    let statusClass = 'status';
-
-                    if (classItem.remainingSeconds === 0) {
-                        statusText = '✅ Goal Completed!';
-                        statusClass = 'status completed';
-                    } else if (classItem.isRunning) {
-                        statusText = '⏱️ Timer Running';
-                    }
+                container.innerHTML = this.timers.map(timerItem => {
+                    const circumference = 2 * Math.PI * 86;
+                    const progress = timerItem.remainingSeconds / timerItem.goalSeconds;
+                    const offset = circumference * (1 - progress);
 
                     return `
-                        <div class="class-card" data-class-id="${classItem.id}">
-                            <div class="class-header">
-                                <div class="class-name">${classItem.name}</div>
-                                <button class="delete-btn" onclick="timer.deleteClass(${classItem.id})">×</button>
+                        <div class="timer-card" data-timer-id="${timerItem.id}" onclick="timer.toggleTimer(${timerItem.id})">
+                            <button class="delete-btn" onclick="event.stopPropagation(); timer.deleteTimer(${timerItem.id})">×</button>
+                            <div class="circular-timer">
+                                <svg viewBox="0 0 180 180">
+                                    <circle class="circular-timer-bg" cx="90" cy="90" r="86"/>
+                                    <circle
+                                        class="circular-timer-progress"
+                                        cx="90"
+                                        cy="90"
+                                        r="86"
+                                        style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${offset};"
+                                    />
+                                </svg>
+                                <div class="timer-content">
+                                    <div class="timer-time">${this.formatTime(timerItem.remainingSeconds)}</div>
+                                </div>
                             </div>
-                            <div class="timer-display">
-                                <div class="time">${this.formatTime(classItem.remainingSeconds)}</div>
-                                <div class="goal">Goal: ${this.formatTime(classItem.goalSeconds)}</div>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${progress}%"></div>
-                            </div>
-                            <div class="controls">
-                                <button class="btn-control btn-start" onclick="timer.startTimer(${classItem.id})" ${classItem.isRunning || classItem.remainingSeconds === 0 ? 'disabled' : ''}>Start</button>
-                                <button class="btn-control btn-pause" onclick="timer.pauseTimer(${classItem.id})" ${!classItem.isRunning ? 'disabled' : ''}>Pause</button>
-                                <button class="btn-control btn-reset" onclick="timer.resetTimer(${classItem.id})">Reset</button>
-                            </div>
-                            <div class="${statusClass}">${statusText}</div>
+                            <div class="course-title">${timerItem.name}</div>
+                            <div class="goal-text">${this.formatGoal(timerItem.goalSeconds)}</div>
                         </div>
                     `;
                 }).join('');
 
                 // Restart any running timers
-                this.classes.forEach(classItem => {
-                    if (classItem.isRunning && classItem.remainingSeconds > 0) {
-                        this.startTimer(classItem.id);
+                this.timers.forEach(timerItem => {
+                    if (timerItem.isRunning && timerItem.remainingSeconds > 0) {
+                        this.toggleTimer(timerItem.id);
                     }
                 });
             }
