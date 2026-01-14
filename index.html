@@ -36,7 +36,6 @@
             padding: 32px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             transition: all 0.3s;
-            cursor: pointer;
             position: relative;
             display: flex;
             flex-direction: column;
@@ -91,13 +90,13 @@
 
         .circular-timer-bg {
             fill: none;
-            stroke: #e8ede9;
+            stroke: #7ea87e;
             stroke-width: 8;
         }
 
         .circular-timer-progress {
             fill: none;
-            stroke: #7ea87e;
+            stroke: #d0d0d0;
             stroke-width: 8;
             stroke-linecap: round;
             transition: stroke-dashoffset 1s linear;
@@ -130,6 +129,58 @@
             font-size: 0.85rem;
             color: #8ba888;
             text-align: center;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #7ea87e;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .control-btn:hover {
+            background: #6b8f6b;
+            transform: scale(1.1);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:active {
+            transform: scale(1.05);
+        }
+
+        .control-btn.pause {
+            background: #ffa726;
+        }
+
+        .control-btn.pause:hover {
+            background: #fb8c00;
+        }
+
+        .control-btn:disabled {
+            background: #e0e0e0;
+            color: #9e9e9e;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .control-btn:disabled:hover {
+            background: #e0e0e0;
+            transform: none;
         }
 
         .add-timer-btn {
@@ -471,10 +522,10 @@
 
                 timeDisplay.textContent = this.formatTime(timerItem.remainingSeconds);
 
-                // Update circular progress
+                // Update circular progress (grey fills in as time counts down)
                 const circumference = 2 * Math.PI * 86; // radius is 86
                 const progress = timerItem.remainingSeconds / timerItem.goalSeconds;
-                const offset = circumference * (1 - progress);
+                const offset = circumference * progress;
                 progressCircle.style.strokeDashoffset = offset;
             }
 
@@ -495,11 +546,15 @@
                 container.innerHTML = this.timers.map(timerItem => {
                     const circumference = 2 * Math.PI * 86;
                     const progress = timerItem.remainingSeconds / timerItem.goalSeconds;
-                    const offset = circumference * (1 - progress);
+                    const offset = circumference * progress;
+
+                    const isComplete = timerItem.remainingSeconds === 0;
+                    const playPauseIcon = timerItem.isRunning ? '⏸' : '▶';
+                    const playPauseClass = timerItem.isRunning ? 'pause' : 'play';
 
                     return `
-                        <div class="timer-card" data-timer-id="${timerItem.id}" onclick="timer.toggleTimer(${timerItem.id})">
-                            <button class="delete-btn" onclick="event.stopPropagation(); timer.deleteTimer(${timerItem.id})">×</button>
+                        <div class="timer-card" data-timer-id="${timerItem.id}">
+                            <button class="delete-btn" onclick="timer.deleteTimer(${timerItem.id})">×</button>
                             <div class="circular-timer">
                                 <svg viewBox="0 0 180 180">
                                     <circle class="circular-timer-bg" cx="90" cy="90" r="86"/>
@@ -517,6 +572,11 @@
                             </div>
                             <div class="course-title">${timerItem.name}</div>
                             <div class="goal-text">${this.formatGoal(timerItem.goalSeconds)}</div>
+                            <div class="timer-controls">
+                                <button class="control-btn ${playPauseClass}" onclick="timer.toggleTimer(${timerItem.id})" ${isComplete ? 'disabled' : ''}>
+                                    ${playPauseIcon}
+                                </button>
+                            </div>
                         </div>
                     `;
                 }).join('');
