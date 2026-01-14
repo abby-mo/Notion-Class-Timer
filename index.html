@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Timer Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2e7d32;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #558b2f;
+            font-size: 0.9rem;
+        }
+
+        .add-class-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px rgba(46, 125, 50, 0.08);
+        }
+
+        .add-class-section h2 {
+            color: #2e7d32;
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #558b2f;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #c8e6c9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #66bb6a;
+            background: #f1f8e9;
+        }
+
+        .time-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+            color: white;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 187, 106, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .classes-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .class-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(46, 125, 50, 0.08);
+            transition: all 0.3s;
+        }
+
+        .class-card:hover {
+            box-shadow: 0 4px 20px rgba(46, 125, 50, 0.12);
+        }
+
+        .class-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .class-name {
+            color: #2e7d32;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .delete-btn {
+            background: #ef5350;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #e53935;
+            transform: scale(1.1);
+        }
+
+        .timer-display {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .time {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #2e7d32;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .goal {
+            color: #81c784;
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e8f5e9;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #66bb6a 0%, #43a047 100%);
+            transition: width 0.3s;
+            border-radius: 4px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+
+        .btn-control {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-start {
+            background: #66bb6a;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background: #43a047;
+        }
+
+        .btn-pause {
+            background: #ffa726;
+            color: white;
+        }
+
+        .btn-pause:hover {
+            background: #fb8c00;
+        }
+
+        .btn-reset {
+            background: #e0e0e0;
+            color: #616161;
+        }
+
+        .btn-reset:hover {
+            background: #bdbdbd;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: #66bb6a;
+            font-weight: 500;
+        }
+
+        .status.completed {
+            color: #43a047;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #81c784;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-text {
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Class Timer</h1>
+            <p>Track your study goals and manage your time effectively</p>
+        </div>
+
+        <div class="add-class-section">
+            <h2>➕ Add New Class</h2>
+            <form id="addClassForm">
+                <div class="form-group">
+                    <label for="className">Class Name</label>
+                    <input type="text" id="className" placeholder="e.g., Mathematics" required>
+                </div>
+                <div class="form-group">
+                    <label>Goal Duration</label>
+                    <div class="time-inputs">
+                        <input type="number" id="goalHours" placeholder="Hours" min="0" max="23" value="1" required>
+                        <input type="number" id="goalMinutes" placeholder="Minutes" min="0" max="59" value="0" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Class</button>
+            </form>
+        </div>
+
+        <div id="classesList" class="classes-list"></div>
+    </div>
+
+    <script>
+        class ClassTimer {
+            constructor() {
+                this.classes = this.loadClasses();
+                this.intervals = {};
+                this.init();
+            }
+
+            init() {
+                this.renderClasses();
+                document.getElementById('addClassForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addClass();
+                });
+            }
+
+            loadClasses() {
+                const saved = localStorage.getItem('classTimers');
+                return saved ? JSON.parse(saved) : [];
+            }
+
+            saveClasses() {
+                localStorage.setItem('classTimers', JSON.stringify(this.classes));
+            }
+
+            addClass() {
+                const name = document.getElementById('className').value;
+                const hours = parseInt(document.getElementById('goalHours').value) || 0;
+                const minutes = parseInt(document.getElementById('goalMinutes').value) || 0;
+
+                const goalSeconds = hours * 3600 + minutes * 60;
+
+                if (goalSeconds <= 0) {
+                    alert('Please set a goal duration greater than 0');
+                    return;
+                }
+
+                const newClass = {
+                    id: Date.now(),
+                    name: name,
+                    goalSeconds: goalSeconds,
+                    remainingSeconds: goalSeconds,
+                    isRunning: false
+                };
+
+                this.classes.push(newClass);
+                this.saveClasses();
+                this.renderClasses();
+
+                document.getElementById('addClassForm').reset();
+                document.getElementById('goalHours').value = '1';
+                document.getElementById('goalMinutes').value = '0';
+            }
+
+            deleteClass(id) {
+                if (this.intervals[id]) {
+                    clearInterval(this.intervals[id]);
+                    delete this.intervals[id];
+                }
+                this.classes = this.classes.filter(c => c.id !== id);
+                this.saveClasses();
+                this.renderClasses();
+            }
+
+            startTimer(id) {
+                const classItem = this.classes.find(c => c.id === id);
+                if (!classItem || classItem.remainingSeconds <= 0) return;
+
+                classItem.isRunning = true;
+                this.saveClasses();
+
+                if (this.intervals[id]) {
+                    clearInterval(this.intervals[id]);
+                }
+
+                this.intervals[id] = setInterval(() => {
+                    classItem.remainingSeconds--;
+
+                    if (classItem.remainingSeconds <= 0) {
+                        classItem.remainingSeconds = 0;
+                        classItem.isRunning = false;
+                        clearInterval(this.intervals[id]);
+                        delete this.intervals[id];
+                    }
+
+                    this.saveClasses();
+                    this.updateClassDisplay(id);
+                }, 1000);
+
+                this.renderClasses();
+            }
+
+            pauseTimer(id) {
+                const classItem = this.classes.find(c => c.id === id);
+                if (!classItem) return;
+
+                classItem.isRunning = false;
+                if (this.intervals[id]) {
+                    clearInterval(this.intervals[id]);
+                    delete this.intervals[id];
+                }
+                this.saveClasses();
+                this.renderClasses();
+            }
+
+            resetTimer(id) {
+                const classItem = this.classes.find(c => c.id === id);
+                if (!classItem) return;
+
+                classItem.isRunning = false;
+                classItem.remainingSeconds = classItem.goalSeconds;
+
+                if (this.intervals[id]) {
+                    clearInterval(this.intervals[id]);
+                    delete this.intervals[id];
+                }
+
+                this.saveClasses();
+                this.renderClasses();
+            }
+
+            formatTime(seconds) {
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                const secs = seconds % 60;
+                return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+
+            updateClassDisplay(id) {
+                const classItem = this.classes.find(c => c.id === id);
+                if (!classItem) return;
+
+                const card = document.querySelector(`[data-class-id="${id}"]`);
+                if (!card) return;
+
+                const timeDisplay = card.querySelector('.time');
+                const progressFill = card.querySelector('.progress-fill');
+                const status = card.querySelector('.status');
+
+                timeDisplay.textContent = this.formatTime(classItem.remainingSeconds);
+
+                const progress = ((classItem.goalSeconds - classItem.remainingSeconds) / classItem.goalSeconds) * 100;
+                progressFill.style.width = `${progress}%`;
+
+                if (classItem.remainingSeconds === 0) {
+                    status.textContent = '✅ Goal Completed!';
+                    status.className = 'status completed';
+                } else if (classItem.isRunning) {
+                    status.textContent = '⏱️ Timer Running';
+                    status.className = 'status';
+                } else {
+                    status.textContent = 'Ready to start';
+                    status.className = 'status';
+                }
+            }
+
+            renderClasses() {
+                const container = document.getElementById('classesList');
+
+                if (this.classes.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🎯</div>
+                            <div class="empty-state-text">No classes yet. Add your first class above!</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = this.classes.map(classItem => {
+                    const progress = ((classItem.goalSeconds - classItem.remainingSeconds) / classItem.goalSeconds) * 100;
+                    let statusText = 'Ready to start';
+                    let statusClass = 'status';
+
+                    if (classItem.remainingSeconds === 0) {
+                        statusText = '✅ Goal Completed!';
+                        statusClass = 'status completed';
+                    } else if (classItem.isRunning) {
+                        statusText = '⏱️ Timer Running';
+                    }
+
+                    return `
+                        <div class="class-card" data-class-id="${classItem.id}">
+                            <div class="class-header">
+                                <div class="class-name">${classItem.name}</div>
+                                <button class="delete-btn" onclick="timer.deleteClass(${classItem.id})">×</button>
+                            </div>
+                            <div class="timer-display">
+                                <div class="time">${this.formatTime(classItem.remainingSeconds)}</div>
+                                <div class="goal">Goal: ${this.formatTime(classItem.goalSeconds)}</div>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                            <div class="controls">
+                                <button class="btn-control btn-start" onclick="timer.startTimer(${classItem.id})" ${classItem.isRunning || classItem.remainingSeconds === 0 ? 'disabled' : ''}>Start</button>
+                                <button class="btn-control btn-pause" onclick="timer.pauseTimer(${classItem.id})" ${!classItem.isRunning ? 'disabled' : ''}>Pause</button>
+                                <button class="btn-control btn-reset" onclick="timer.resetTimer(${classItem.id})">Reset</button>
+                            </div>
+                            <div class="${statusClass}">${statusText}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Restart any running timers
+                this.classes.forEach(classItem => {
+                    if (classItem.isRunning && classItem.remainingSeconds > 0) {
+                        this.startTimer(classItem.id);
+                    }
+                });
+            }
+        }
+
+        const timer = new ClassTimer();
+    </script>
+</body>
+</html>
