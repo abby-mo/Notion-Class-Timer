@@ -1,20 +1,18 @@
 :root {
-  --bg-0: #e8f0ea;
-  --bg-1: #f4f7f2;
-  --ink: #1c2a22;
-  --ink-soft: #5a6b60;
-  --line: rgba(28, 42, 34, 0.12);
-  --surface: rgba(255, 255, 255, 0.72);
-  --surface-strong: #ffffff;
-  --accent: #1f6b4a;
-  --accent-deep: #154d36;
-  --accent-soft: rgba(31, 107, 74, 0.12);
-  --done: #2f6f4e;
-  --danger: #8a3a2d;
-  --shadow: 0 10px 30px rgba(28, 42, 34, 0.08);
-  --radius: 18px;
+  --bg: #ffffff;
+  --ink: #1a1f24;
+  --ink-soft: #6b7380;
+  --surface: #ffffff;
+  --accent: #7f9a86;
+  --accent-deep: #5f7a66;
+  --accent-soft: rgba(127, 154, 134, 0.14);
+  --ring-track: #e8eee9;
+  --line: rgba(55, 53, 47, 0.12);
+  --shadow: 0 1px 3px rgba(15, 15, 15, 0.08), 0 8px 24px rgba(15, 15, 15, 0.04);
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "DM Sans", system-ui, sans-serif;
+  --card-width: 190px;
+  --card-height: 300px;
 }
 
 * {
@@ -25,15 +23,13 @@ html,
 body {
   margin: 0;
   min-height: 100%;
+  background: #ffffff;
 }
 
 body {
   font-family: var(--font-body);
   color: var(--ink);
-  background:
-    radial-gradient(1200px 500px at 10% -10%, #d7ebe0 0%, transparent 55%),
-    radial-gradient(900px 420px at 100% 0%, #dce6f0 0%, transparent 50%),
-    linear-gradient(180deg, var(--bg-1), var(--bg-0));
+  background: #ffffff;
 }
 
 button,
@@ -52,34 +48,160 @@ button {
 }
 
 .shell {
-  width: min(440px, 100%);
+  width: min(960px, 100%);
   margin: 0 auto;
-  padding: 20px 16px 28px;
+  padding: 16px 18px 28px;
   display: grid;
-  gap: 16px;
+  gap: 14px;
 }
 
-.top {
+.toolbar {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
+  justify-content: flex-end;
 }
 
-.eyebrow {
-  margin: 0 0 4px;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.theme-picker {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.theme-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--line), var(--shadow);
+  pointer-events: none;
+}
+
+.theme-picker input[type="color"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.board {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 8px 4px 16px;
+  scrollbar-width: thin;
+}
+
+.empty {
+  margin: 24px 0;
   color: var(--ink-soft);
+  line-height: 1.45;
+  align-self: center;
 }
 
-.top h1 {
+.timer-card {
+  flex: 0 0 var(--card-width);
+  width: var(--card-width);
+  min-height: var(--card-height);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  padding: 18px 16px 16px;
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  justify-items: center;
+  gap: 10px;
+  animation: rise 220ms ease;
+}
+
+.timer-card.is-running {
+  box-shadow: 0 16px 40px rgba(95, 122, 102, 0.18);
+}
+
+.timer-card.is-done .ring-progress {
+  stroke: var(--accent-deep);
+}
+
+.card-top {
+  text-align: center;
+  width: 100%;
+}
+
+.card-top h2 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.7rem;
+  font-size: 1.05rem;
   font-weight: 600;
+  line-height: 1.2;
+}
+
+.meta,
+.reset-hint {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+}
+
+.reset-hint {
+  margin: 0;
+}
+
+.ring-btn {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  transition: transform 160ms ease;
+}
+
+.ring-btn:hover {
+  transform: scale(1.02);
+}
+
+.ring {
+  width: 140px;
+  height: 140px;
+  transform: rotate(-90deg);
+}
+
+.ring-track,
+.ring-progress {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+.ring-track {
+  stroke: var(--ring-track);
+}
+
+.ring-progress {
+  stroke: var(--accent);
+  transition: stroke-dashoffset 300ms ease;
+}
+
+.clock {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-body);
+  font-size: 1.55rem;
+  font-weight: 700;
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 .btn {
@@ -94,39 +216,58 @@ button {
   transform: translateY(-1px);
 }
 
-.btn:active {
-  transform: translateY(0);
-}
-
 .btn.primary {
-  background: var(--accent);
-  color: white;
-}
-
-.btn.primary:hover {
   background: var(--accent-deep);
+  color: white;
 }
 
 .btn.ghost {
   border-color: var(--line);
-  background: rgba(255, 255, 255, 0.45);
+  background: #f7f8fa;
 }
 
-.btn.ghost:hover {
-  background: var(--surface-strong);
+.btn.complete {
+  width: 100%;
+  margin-top: auto;
+  border-color: var(--line);
+  background: #f7f7f5;
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 500;
 }
 
-.create-form,
-.timer-card {
-  background: var(--surface);
-  backdrop-filter: blur(10px);
+.btn.complete:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.add-btn {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  align-self: flex-start;
+  margin-top: 8px;
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: 50%;
+  background: var(--surface);
   box-shadow: var(--shadow);
-  padding: 16px;
+  color: var(--accent-deep);
+  font-size: 1.6rem;
+  line-height: 1;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.add-btn:hover {
+  transform: scale(1.06);
+  background: var(--accent-soft);
 }
 
 .create-form {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  padding: 16px;
   display: grid;
   gap: 12px;
   animation: rise 220ms ease;
@@ -148,7 +289,7 @@ button {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 0.65rem 0.75rem;
-  background: var(--surface-strong);
+  background: #fff;
 }
 
 .row {
@@ -169,116 +310,10 @@ button {
   gap: 8px;
 }
 
-.list {
-  display: grid;
-  gap: 12px;
-}
-
-.empty {
-  margin: 8px 0 0;
-  color: var(--ink-soft);
-  line-height: 1.45;
-}
-
-.timer-card {
-  display: grid;
-  gap: 14px;
-  animation: rise 220ms ease;
-}
-
-.timer-card.is-running {
-  border-color: rgba(31, 107, 74, 0.35);
-  box-shadow: 0 10px 30px rgba(31, 107, 74, 0.12);
-}
-
-.timer-card.is-done .progress-fill {
-  background: linear-gradient(90deg, var(--done), #4f9a6f);
-}
-
-.timer-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.timer-head h2 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.meta {
-  margin: 4px 0 0;
-  color: var(--ink-soft);
-  font-size: 0.85rem;
-}
-
-.icon-btn {
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--ink-soft);
-  font-size: 1.2rem;
-  line-height: 1;
-}
-
-.icon-btn:hover {
-  background: rgba(138, 58, 45, 0.1);
-  color: var(--danger);
-}
-
-.progress-block {
-  display: grid;
-  gap: 8px;
-}
-
-.progress-track {
-  height: 10px;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  width: 0;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent), #3d9a6e);
-  transition: width 300ms ease;
-}
-
-.progress-numbers {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.elapsed {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.of {
-  color: var(--ink-soft);
-  font-size: 0.9rem;
-}
-
-.timer-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -286,12 +321,23 @@ button {
   }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 520px) {
   .row {
     grid-template-columns: 1fr;
   }
 
-  .top h1 {
-    font-size: 1.45rem;
+  :root {
+    --card-width: 170px;
+    --card-height: 280px;
+  }
+
+  .ring-btn,
+  .ring {
+    width: 124px;
+    height: 124px;
+  }
+
+  .clock {
+    font-size: 1.35rem;
   }
 }
