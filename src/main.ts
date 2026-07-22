@@ -1,4 +1,4 @@
-import type { ResetPeriod, Timer, TimerInput } from "./types";
+import type { NotionTask, ResetPeriod, Timer, TimerInput } from "./types";
 import {
   applyPeriodReset,
   createId,
@@ -12,6 +12,7 @@ import {
 } from "./timers";
 import { applyThemeColor, loadThemeColor, saveThemeColor } from "./theme";
 import { playCompletionSound } from "./sound";
+import { completeNotionTask, fetchNotionTasks, isNotionConfigured } from "./notion";
 import "./style.css";
 
 const RING_RADIUS = 54;
@@ -32,6 +33,10 @@ const chimedKeys = new Set(
 
 let showForm = false;
 let tickHandle: number | undefined;
+let notionTasks: NotionTask[] = [];
+let notionTasksStatus: "idle" | "loading" | "ready" | "error" = "idle";
+let notionTasksError = "";
+let completingId: string | null = null;
 
 function chimeKey(timer: Timer): string {
   return `${timer.id}:${timer.periodStartedAt}`;
@@ -63,6 +68,7 @@ function createTimer(input: TimerInput): void {
     periodStartedAt: periodStartFor(input.period, now).toISOString(),
     runningSince: null,
     createdAt: now.toISOString(),
+    notionPageId: input.notionPageId,
   };
   timers = [timer, ...timers];
   persist();
@@ -89,10 +95,26 @@ function toggleRun(id: string): void {
   render();
 }
 
-function completeGoal(id: string): void {
-  timers = timers.filter((t) => t.id !== id);
-  persist();
+async function completeGoal(id: string): Promise<void> {
+  const timer = timers.find((t) => t.id === id);
+  if (!timer || completingId) return;
+
+  completingId = id;
   render();
+
+  try {
+    if (timer.notionPageId) {
+      await completeNotionTask(timer.notionPageId);
+    }
+    timers = timers.filter((t) => t.id !== id);
+    persist();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Could not update Notion";
+    alert(`Couldn't mark the Notion task complete.\n\n${message}`);
+  } finally {
+    completingId = null;
+    render();
+  }
 }
 
 function resetElapsed(id: string): void {
@@ -103,6 +125,28 @@ function resetElapsed(id: string): void {
     t.id === id ? { ...t, elapsedMs: 0, runningSince: null } : t,
   );
   persist();
+  render();
+}
+
+async function loadNotionTasksForForm(): Promise<void> {
+  if (!isNotionConfigured()) {
+    notionTasks = [];
+    notionTasksStatus = "idle";
+    return;
+  }
+
+  notionTasksStatus = "loading";
+  notionTasksError = "";
+  render();
+
+  try {
+    notionTasks = await fetchNotionTasks();
+    notionTasksStatus = "ready";
+  } catch (error) {
+    notionTasks = [];
+    notionTasksStatus = "error";
+    notionTasksError = error instanceof Error ? error.message : "Failed to load tasks";
+  }
   render();
 }
 
@@ -208,12 +252,45 @@ function resetsInLabel(timer: Timer): string {
   return `resets in ${Math.ceil(ms / 86_400_000)}d`;
 }
 
+function renderNotionTaskField(): string {
+  if (!isNotionConfigured()) {
+    return `
+      <p class="form-note">
+        Notion linking is optional. Add <code>VITE_NOTION_API_URL</code> after deploying the worker to connect your to-do database.
+      </p>
+    `;
+  }
+
+  if (notionTasksStatus === "loading") {
+    return `<p class="form-note">Loading Notion tasks…</p>`;
+  }
+
+  if (notionTasksStatus === "error") {
+    return `<p class="form-note error">${escapeHtml(notionTasksError)}</p>`;
+  }
+
+  const options = notionTasks
+    .map((task) => `<option value="${escapeHtml(task.id)}">${escapeHtml(task.title)}</option>`)
+    .join("");
+
+  return `
+    <label>
+      <span>Notion to-do</span>
+      <select name="notionPageId" id="notion-task-select">
+        <option value="">None</option>
+        ${options}
+      </select>
+    </label>
+  `;
+}
+
 function renderForm(): string {
   return `
     <form class="create-form" id="create-form">
+      ${renderNotionTaskField()}
       <label>
         <span>Name</span>
-        <input name="name" type="text" placeholder="Meditation" required maxlength="40" autocomplete="off" />
+        <input name="name" id="timer-name" type="text" placeholder="Meditation" required maxlength="40" autocomplete="off" />
       </label>
       <div class="row">
         <label>
@@ -249,12 +326,16 @@ function renderTimerCard(timer: Timer): string {
   const done = elapsed >= timer.targetMs;
   const running = Boolean(timer.runningSince);
   const offset = ringOffset(pct);
+  const isCompleting = completingId === timer.id;
 
   return `
     <article class="timer-card ${running ? "is-running" : ""} ${done ? "is-done" : ""}" data-id="${timer.id}">
       <div class="card-top">
         <h2>${escapeHtml(timer.name)}</h2>
-        <p class="meta">${formatTarget(timer.targetMs)} ${periodLabel(timer.period)}</p>
+        <p class="meta">
+          ${formatTarget(timer.targetMs)} ${periodLabel(timer.period)}
+          ${timer.notionPageId ? ` · <span class="notion-tag">Notion</span>` : ""}
+        </p>
       </div>
 
       <button class="ring-btn" data-action="toggle" title="${running ? "Pause" : "Start"}" aria-label="${running ? "Pause" : "Start"} ${escapeHtml(timer.name)}">
@@ -275,7 +356,9 @@ function renderTimerCard(timer: Timer): string {
 
       <div class="card-actions">
         <button class="btn reset" data-action="reset">Reset</button>
-        <button class="btn complete" data-action="complete">Complete goal</button>
+        <button class="btn complete" data-action="complete" ${isCompleting ? "disabled" : ""}>
+          ${isCompleting ? "Updating Notion…" : "Complete goal"}
+        </button>
       </div>
     </article>
   `;
@@ -339,12 +422,22 @@ function bindEvents(): void {
 
   document.querySelector("#open-create")?.addEventListener("click", () => {
     showForm = true;
+    void loadNotionTasksForForm();
     render();
   });
 
   document.querySelector("#cancel-create")?.addEventListener("click", () => {
     showForm = false;
     render();
+  });
+
+  const notionSelect = document.querySelector<HTMLSelectElement>("#notion-task-select");
+  const nameInput = document.querySelector<HTMLInputElement>("#timer-name");
+  notionSelect?.addEventListener("change", () => {
+    const task = notionTasks.find((t) => t.id === notionSelect.value);
+    if (task && nameInput && !nameInput.value.trim()) {
+      nameInput.value = task.title.slice(0, 40);
+    }
   });
 
   const form = document.querySelector<HTMLFormElement>("#create-form");
@@ -355,17 +448,20 @@ function bindEvents(): void {
     const amount = Number(data.get("amount"));
     const unit = String(data.get("unit"));
     const period = String(data.get("period")) as ResetPeriod;
+    const notionPageId = String(data.get("notionPageId") ?? "").trim() || undefined;
     if (!name || !Number.isFinite(amount) || amount <= 0) return;
 
     const targetMinutes = unit === "hours" ? amount * 60 : amount;
-    createTimer({ name, targetMinutes, period });
+    createTimer({ name, targetMinutes, period, notionPageId });
   });
 
   app.querySelectorAll<HTMLElement>(".timer-card").forEach((card) => {
     const id = card.dataset.id!;
     card.querySelector('[data-action="toggle"]')?.addEventListener("click", () => toggleRun(id));
     card.querySelector('[data-action="reset"]')?.addEventListener("click", () => resetElapsed(id));
-    card.querySelector('[data-action="complete"]')?.addEventListener("click", () => completeGoal(id));
+    card.querySelector('[data-action="complete"]')?.addEventListener("click", () => {
+      void completeGoal(id);
+    });
   });
 }
 

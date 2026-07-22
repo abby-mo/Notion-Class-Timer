@@ -13,10 +13,18 @@ export interface Timer {
   /** If running, wall-clock time when the current run started */
   runningSince: string | null;
   createdAt: string;
+  /** Linked Notion to-do page, if any */
+  notionPageId?: string;
 }
 
 export interface TimerInput {
   name: string;
   targetMinutes: number;
   period: ResetPeriod;
+  notionPageId?: string;
+}
+
+export interface NotionTask {
+  id: string;
+  title: string;
 }

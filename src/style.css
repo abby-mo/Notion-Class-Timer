@@ -326,6 +326,32 @@ button {
   gap: 8px;
 }
 
+.form-note {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.form-note.error {
+  color: #8a3a2d;
+}
+
+.form-note code {
+  font-size: 0.78rem;
+}
+
+.notion-tag {
+  color: var(--accent-deep);
+  font-weight: 600;
+}
+
+.btn.complete:disabled {
+  opacity: 0.65;
+  cursor: wait;
+  transform: none;
+}
+
 @keyframes rise {
   from {
     opacity: 0;

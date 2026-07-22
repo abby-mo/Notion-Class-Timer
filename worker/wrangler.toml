@@ -1,0 +1,9 @@
+name = "notion-class-timer-api"
+main = "src/index.ts"
+compatibility_date = "2024-11-01"
+workers_dev = true
+
+[vars]
+NOTION_DONE_PROPERTY = "Done"
+NOTION_TITLE_PROPERTY = "Name"
+ALLOWED_ORIGIN = "*"
