@@ -121,10 +121,6 @@ button {
   animation: rise 220ms ease;
 }
 
-.timer-card.is-running {
-  box-shadow: 0 16px 40px rgba(95, 122, 102, 0.18);
-}
-
 .timer-card.is-done .ring-progress {
   stroke: var(--accent-deep);
 }
@@ -228,7 +224,6 @@ button {
 
 .btn.complete {
   width: 100%;
-  margin-top: auto;
   border-color: var(--line);
   background: #f7f7f5;
   color: var(--ink);
@@ -239,6 +234,27 @@ button {
 .btn.complete:hover {
   background: var(--accent-soft);
   border-color: var(--accent);
+}
+
+.card-actions {
+  width: 100%;
+  margin-top: auto;
+  display: grid;
+  gap: 8px;
+}
+
+.btn.reset {
+  width: 100%;
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  padding: 0.35rem 0.75rem;
+}
+
+.btn.reset:hover {
+  color: var(--ink);
+  background: #f7f7f5;
 }
 
 .add-btn {

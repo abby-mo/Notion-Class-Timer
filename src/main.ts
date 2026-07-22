@@ -11,6 +11,7 @@ import {
   saveTimers,
 } from "./timers";
 import { applyThemeColor, loadThemeColor, saveThemeColor } from "./theme";
+import { playCompletionSound } from "./sound";
 import "./style.css";
 
 const RING_RADIUS = 54;
@@ -24,8 +25,17 @@ saveTimers(timers);
 let themeColor = loadThemeColor();
 applyThemeColor(themeColor);
 
+/** Timers that already chimed for the current period (`id:periodStartedAt`). */
+const chimedKeys = new Set(
+  timers.filter((t) => liveElapsedMs(t) >= t.targetMs).map(chimeKey),
+);
+
 let showForm = false;
 let tickHandle: number | undefined;
+
+function chimeKey(timer: Timer): string {
+  return `${timer.id}:${timer.periodStartedAt}`;
+}
 
 function persist(): void {
   saveTimers(timers);
@@ -85,11 +95,50 @@ function completeGoal(id: string): void {
   render();
 }
 
+function resetElapsed(id: string): void {
+  const timer = timers.find((t) => t.id === id);
+  if (timer) chimedKeys.delete(chimeKey(timer));
+
+  timers = timers.map((t) =>
+    t.id === id ? { ...t, elapsedMs: 0, runningSince: null } : t,
+  );
+  persist();
+  render();
+}
+
+function maybeAnnounceCompletion(timer: Timer): void {
+  const key = chimeKey(timer);
+  const done = liveElapsedMs(timer) >= timer.targetMs;
+  if (!done) {
+    chimedKeys.delete(key);
+    return;
+  }
+  if (chimedKeys.has(key)) return;
+  chimedKeys.add(key);
+  void playCompletionSound();
+}
+
+function pauseTimer(id: string): void {
+  const now = new Date();
+  timers = timers.map((t) => {
+    if (t.id !== id || !t.runningSince) return t;
+    const extra = Math.max(0, now.getTime() - new Date(t.runningSince).getTime());
+    return {
+      ...t,
+      elapsedMs: t.elapsedMs + extra,
+      runningSince: null,
+    };
+  });
+  persist();
+}
+
 function updateLiveDisplays(): void {
   if (refreshPeriods()) {
     render();
     return;
   }
+
+  let needsFullRender = false;
 
   for (const timer of timers) {
     if (!timer.runningSince) continue;
@@ -105,6 +154,16 @@ function updateLiveDisplays(): void {
     const clock = card.querySelector<HTMLElement>(".clock");
     if (ring) ring.style.strokeDashoffset = String(ringOffset(pct));
     if (clock) clock.textContent = formatClock(elapsed);
+
+    if (done) {
+      maybeAnnounceCompletion(timer);
+      pauseTimer(timer.id);
+      needsFullRender = true;
+    }
+  }
+
+  if (needsFullRender) {
+    render();
   }
 }
 
@@ -214,9 +273,10 @@ function renderTimerCard(timer: Timer): string {
 
       <p class="reset-hint">${resetsInLabel(timer)}</p>
 
-      <button class="btn complete" data-action="complete">
-        Complete goal
-      </button>
+      <div class="card-actions">
+        <button class="btn reset" data-action="reset">Reset</button>
+        <button class="btn complete" data-action="complete">Complete goal</button>
+      </div>
     </article>
   `;
 }
@@ -304,6 +364,7 @@ function bindEvents(): void {
   app.querySelectorAll<HTMLElement>(".timer-card").forEach((card) => {
     const id = card.dataset.id!;
     card.querySelector('[data-action="toggle"]')?.addEventListener("click", () => toggleRun(id));
+    card.querySelector('[data-action="reset"]')?.addEventListener("click", () => resetElapsed(id));
     card.querySelector('[data-action="complete"]')?.addEventListener("click", () => completeGoal(id));
   });
 }
